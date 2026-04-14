@@ -87,20 +87,19 @@ Retrieval-Augmented Generation using the actual Austrian tax law PDFs as source 
 
 ## 3. Evaluation Methodology
 
-Since no ground-truth answers exist for the 643 test questions, evaluation uses two approaches:
+Model outputs are evaluated against **ground-truth answers** from the Austrian Tax Law Dataset (`Austrian Tax Law Dataset - Dataset.csv`), which contains expert-written `correct_answer` entries for each of the 643 test questions.
 
-1. **Reference-free metrics** — measure answer quality without needing ground truth:
-   - **Average word count** — answer completeness
-   - **Trigram uniqueness** — ratio of unique trigrams to total trigrams (detects repetition; 1.0 = no repetition)
-   - **Vocabulary diversity** — unique words / total words across all answers
+**Metrics used:**
 
-2. **Cross-model metrics** — using Model 3 (RAG) as pseudo-reference, since it has access to the actual law texts and uses a strong generation model (GPT-4o-mini):
-   - **BLEU** — n-gram precision (how many n-grams in the prediction appear in the reference)
-   - **ROUGE-1** — unigram recall
-   - **ROUGE-2** — bigram recall
-   - **ROUGE-L** — longest common subsequence F1
-   - **BERTScore** — semantic similarity using contextual embeddings (multilingual BERT, `lang=de`)
-   - **Exact Match** — strict string equality after normalization
+1. **Exact Match** — strict string equality after normalization. Very strict: even a correct answer worded differently scores 0.
+2. **BLEU-4** — n-gram precision with smoothing. Measures how many 1- to 4-grams in the prediction appear in the reference.
+3. **ROUGE-1 / ROUGE-2 / ROUGE-L** — recall-oriented n-gram overlap. ROUGE-1 = unigram, ROUGE-2 = bigram, ROUGE-L = longest common subsequence F1.
+4. **BERTScore** — semantic similarity using contextual embeddings from multilingual BERT (`lang=de`). Captures meaning beyond surface n-gram overlap — important for German legal text where correct answers can be paraphrased.
+
+**Reference-free quality metrics** (no ground truth needed):
+- **Average word count** — answer completeness
+- **Trigram uniqueness** — ratio of unique trigrams to total (detects repetition; 1.0 = no repetition)
+- **Vocabulary diversity** — unique words / total words
 
 The evaluation script is in `evaluation/model_evaluation.ipynb`.
 
@@ -110,15 +109,17 @@ The evaluation script is in `evaluation/model_evaluation.ipynb`.
 
 ### Main Results Table
 
-| Model | Avg Words | Trigram Uniqueness | BLEU | ROUGE-1 | ROUGE-2 | ROUGE-L | BERTScore F1 | Exact Match |
-|---|---|---|---|---|---|---|---|---|
-| Model 1 (Baseline GPT-2) | ~106 | low | low | low | low | low | moderate | 0.0 |
-| Model 2 (Fine-tuned GPT-2) | ~115 | low | low | low | low | low | moderate | 0.0 |
-| **Model 3 (RAG + GPT-4o-mini)** | **~51** | **high** | **1.0** (ref) | **1.0** (ref) | **1.0** (ref) | **1.0** (ref) | **1.0** (ref) | **1.0** (ref) |
+All metrics are computed against ground-truth answers from the Austrian Tax Law Dataset.
 
-*Note: Exact numeric values are computed by running `model_evaluation.ipynb`. Model 3 scores are 1.0 because it is used as the reference.*
+| Model | Exact Match | BLEU-4 | ROUGE-1 | ROUGE-2 | ROUGE-L | BERTScore F1 |
+|---|---|---|---|---|---|---|
+| Model 1 (Baseline GPT-2) | — | — | — | — | — | — |
+| Model 2 (Fine-tuned GPT-2) | — | — | — | — | — | — |
+| **Model 3 (RAG + GPT-4o-mini)** | **—** | **—** | **—** | **—** | **—** | **—** |
 
-**Model 3 (RAG) clearly outperforms** both other models. It produces concise, factually grounded answers with paragraph citations, while Models 1 and 2 produce longer but less accurate and often repetitive text.
+*Exact numeric values are populated by running `model_evaluation.ipynb`. See `evaluation_results.csv` for the computed table.*
+
+**Model 3 (RAG) is expected to outperform** both other models, since it has access to the actual law texts at query time and uses GPT-4o-mini for generation. Models 1 and 2 rely solely on what `dbmdz/german-gpt2` learned during pre-training / fine-tuning.
 
 ---
 

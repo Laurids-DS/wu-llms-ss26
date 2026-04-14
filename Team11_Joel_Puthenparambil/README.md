@@ -16,7 +16,7 @@
 | Model | `mistralai/Mistral-7B-Instruct-v0.2` |
 | Parameters | 7 billion |
 | Quantization | 4-bit (bitsandbytes `BitsAndBytesConfig`) |
-| Sampling | `do_sample=True`, `temperature=0.7`, `top_p=0.9`, `max_new_tokens=200` |
+| Sampling | `do_sample=False` (greedy decoding), `max_new_tokens=200` |
 | Platform | Google Colab (free T4 GPU) |
 | Notebook | `code/model1_inference.ipynb` |
 | Output | `results/model1_inference.csv` |
@@ -55,7 +55,7 @@ Halluziniere keine Paragraphen. Wenn unklar, formuliere vorsichtig.
 
 **Fine-tuning data:** 758 template-generated German Q&A pairs created from Austrian statute text scraped from RIS (ris.bka.gv.at). Statutes: EStG 1988, KStG 1988, UStG 1994, GrEStG 1987, BAO. The `dataset_clean.csv` test set was NOT used for training.
 
-**Inference parameters:** `repetition_penalty=1.3`, `do_sample=True`, `temperature=0.5`, `top_p=0.9`, `max_new_tokens=200`.
+**Inference parameters:** `do_sample=True`, `temperature=0.5`, `top_p=0.9`, `repetition_penalty=1.3`, `max_new_tokens=150`.
 
 ---
 

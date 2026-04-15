@@ -1,4 +1,0 @@
-model,ROUGE-L
-baseline,0.1434
-fine_tuned,0.1451
-rag,0.0549
